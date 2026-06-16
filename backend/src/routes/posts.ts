@@ -101,14 +101,17 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
 
     // 检查当前用户是否已点赞
     let liked = false;
+    let favorited = false;
     if (req.userId) {
       const like = db.prepare('SELECT id FROM likes WHERE post_id = ? AND user_id = ?').get(id, req.userId);
       liked = !!like;
+      const fav = db.prepare('SELECT id FROM favorites WHERE post_id = ? AND user_id = ?').get(id, req.userId);
+      favorited = !!fav;
     }
 
     const isOwner = req.userId === post.user_id;
 
-    res.json({ ...post, comments, liked, isOwner });
+    res.json({ ...post, comments, liked, favorited, isOwner });
   } catch (err) {
     console.error('获取帖子详情失败:', err);
     res.status(500).json({ error: '服务器错误' });

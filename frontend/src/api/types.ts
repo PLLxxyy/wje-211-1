@@ -13,6 +13,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   liked?: boolean;
+  favorited?: boolean;
   isOwner?: boolean;
   user_id?: number;
 }
@@ -33,6 +34,7 @@ export interface PostsResponse {
 export interface PostDetail extends Post {
   comments: Comment[];
   liked: boolean;
+  favorited: boolean;
   isOwner: boolean;
 }
 

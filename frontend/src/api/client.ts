@@ -66,6 +66,13 @@ export const api = {
   toggleLike: (postId: number) =>
     request(`/likes/${postId}`, { method: 'POST' }),
 
+  // 收藏
+  toggleFavorite: (postId: number) =>
+    request(`/favorites/${postId}`, { method: 'POST' }),
+
+  getMyFavorites: (page?: number) =>
+    request(`/favorites?page=${page || 1}`),
+
   // 管理员
   adminDeletePost: (id: number) =>
     request(`/admin/posts/${id}`, { method: 'DELETE' }),

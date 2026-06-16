@@ -52,6 +52,19 @@ export default function PostDetailPage({ postId, user, onBack, onNavigate }: Pro
     }
   };
 
+  const handleFavorite = async () => {
+    if (!user) {
+      onNavigate('login');
+      return;
+    }
+    try {
+      await api.toggleFavorite(postId);
+      loadPost();
+    } catch {
+      // 忽略
+    }
+  };
+
   const handleComment = async () => {
     if (!user) {
       onNavigate('login');
@@ -154,6 +167,12 @@ export default function PostDetailPage({ postId, user, onBack, onNavigate }: Pro
               onClick={handleLike}
             >
               {post.liked ? '❤️' : '🤍'} {post.like_count} 赞
+            </button>
+            <button
+              className={`post-action ${post.favorited ? 'liked' : ''}`}
+              onClick={handleFavorite}
+            >
+              {post.favorited ? '⭐' : '☆'} {post.favorited ? '已收藏' : '收藏'}
             </button>
             <span className="post-action">
               💬 {post.comment_count} 评论

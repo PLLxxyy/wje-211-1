@@ -10,8 +10,9 @@ interface Props {
 }
 
 export default function ProfilePage({ user, onNavigate }: Props) {
-  const [tab, setTab] = useState<'mine' | 'admin'>('mine');
+  const [tab, setTab] = useState<'mine' | 'favorites' | 'admin'>('mine');
   const [posts, setPosts] = useState<Post[]>([]);
+  const [favorites, setFavorites] = useState<Post[]>([]);
   const [adminPosts, setAdminPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,6 +26,9 @@ export default function ProfilePage({ user, onNavigate }: Props) {
       if (tab === 'mine') {
         const data = await api.getMyPosts();
         setPosts(data.posts);
+      } else if (tab === 'favorites') {
+        const data = await api.getMyFavorites();
+        setFavorites(data.posts);
       } else {
         const data = await api.adminGetPosts();
         setAdminPosts(data.posts);
@@ -56,6 +60,16 @@ export default function ProfilePage({ user, onNavigate }: Props) {
     }
   };
 
+  const handleUnfavorite = async (postId: number) => {
+    if (!confirm('确定要取消收藏这条帖子吗？')) return;
+    try {
+      await api.toggleFavorite(postId);
+      loadPosts();
+    } catch {
+      alert('取消收藏失败');
+    }
+  };
+
   const formatTime = (dateStr: string) => {
     const date = new Date(dateStr);
     return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
@@ -81,12 +95,18 @@ export default function ProfilePage({ user, onNavigate }: Props) {
         </div>
 
         {/* 标签页 */}
-        <div className="tabs" style={{ maxWidth: user.role === 'admin' ? 400 : 200 }}>
+        <div className="tabs" style={{ maxWidth: user.role === 'admin' ? 600 : 400 }}>
           <button
             className={`tab ${tab === 'mine' ? 'active' : ''}`}
             onClick={() => setTab('mine')}
           >
             我的帖子
+          </button>
+          <button
+            className={`tab ${tab === 'favorites' ? 'active' : ''}`}
+            onClick={() => setTab('favorites')}
+          >
+            我的收藏
           </button>
           {user.role === 'admin' && (
             <button
@@ -145,6 +165,61 @@ export default function ProfilePage({ user, onNavigate }: Props) {
                       onClick={(e) => { e.stopPropagation(); handleDeleteMyPost(post.id); }}
                     >
                       🗑️ 删除
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </>
+        )}
+
+        {/* 我的收藏 */}
+        {tab === 'favorites' && (
+          <>
+            {loading ? (
+              <div className="loading">正在加载...</div>
+            ) : favorites.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-state-icon">⭐</div>
+                <div className="empty-state-text">你还没有收藏任何帖子</div>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => onNavigate('home')}
+                  style={{ marginTop: 16 }}
+                >
+                  去逛逛
+                </button>
+              </div>
+            ) : (
+              favorites.map(post => (
+                <div key={post.id} className="post-card" style={{ cursor: 'pointer' }}>
+                  <div
+                    onClick={() => onNavigate('post-detail', post.id)}
+                  >
+                    <div className="post-header">
+                      <div className="post-meta">
+                        <span className={`mood-tag ${getMoodCss(post.mood)}`}>
+                          {getMoodEmoji(post.mood)} {post.mood}
+                        </span>
+                      </div>
+                      <span className="post-time">{formatTime(post.created_at)}</span>
+                    </div>
+                    <div className="post-content post-content-preview">
+                      {post.content}
+                    </div>
+                  </div>
+                  <div className="post-actions">
+                    <span className="post-action">
+                      ❤️ {post.like_count}
+                    </span>
+                    <span className="post-action">
+                      💬 {post.comment_count}
+                    </span>
+                    <button
+                      className="delete-btn"
+                      onClick={(e) => { e.stopPropagation(); handleUnfavorite(post.id); }}
+                    >
+                      ⭐ 取消收藏
                     </button>
                   </div>
                 </div>
