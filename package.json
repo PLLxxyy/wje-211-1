@@ -1,0 +1,17 @@
+{
+  "name": "anonymous-confession-wall",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "seed": "cd backend && npx ts-node seed.ts",
+    "dev": "concurrently -n backend,frontend -c blue,green \"cd backend && PORT=3211 npm run dev\" \"cd frontend && VITE_PORT=5211 VITE_API_PORT=3211 npm run dev\"",
+    "dev:backend": "cd backend && PORT=3211 npm run dev",
+    "dev:frontend": "cd frontend && VITE_PORT=5211 VITE_API_PORT=3211 npm run dev",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "start": "cd backend && PORT=3211 npm run start"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
