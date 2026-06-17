@@ -1,6 +1,6 @@
 import { Router, Response } from 'express';
 import db from '../db';
-import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { authMiddleware, optionalAuthMiddleware, AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
@@ -78,7 +78,7 @@ router.get('/user/mine', authMiddleware, (req: AuthRequest, res: Response) => {
 });
 
 // 获取帖子详情
-router.get('/:id', (req: AuthRequest, res: Response) => {
+router.get('/:id', optionalAuthMiddleware, (req: AuthRequest, res: Response) => {
   try {
     const { id } = req.params;
     const post = db.prepare(`

@@ -30,6 +30,21 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
   }
 }
 
+export function optionalAuthMiddleware(req: AuthRequest, _res: Response, next: NextFunction): void {
+  const header = req.headers.authorization;
+  if (header && header.startsWith('Bearer ')) {
+    try {
+      const token = header.slice(7);
+      const payload = jwt.verify(token, JWT_SECRET) as { userId: number; role: string };
+      req.userId = payload.userId;
+      req.userRole = payload.role;
+    } catch {
+      // token 无效时忽略，允许匿名访问
+    }
+  }
+  next();
+}
+
 export function adminMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
   if (req.userRole !== 'admin') {
     res.status(403).json({ error: '权限不足，需要管理员权限' });
